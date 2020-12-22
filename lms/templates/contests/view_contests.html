@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container-fluid">
+        {% if contests %}
+
+            {% for contest in contests %}
+                <div class="card col-8" id="main_body">
+                    <div class="card-body row" style="align-content: space-around">
+                        <div class="col-11">
+                            <h6 class="card-title">{{ contest.name }}</h6>
+                            <h6 class="card-title">Starts At:{{ contest.starts_at }}</h6>
+                            {% if contest.ends_at %}
+                                <h6 class="card-title">Ends At:{{ contest.ends_at }}</h6>
+                            {% endif %}
+                        </div>
+                        <div class="col-1">
+                            <a class="btn btn-primary" href="{% url 'view-contest-student' id=contest.id %}">View</a>
+                        </div>
+
+                    </div>
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+            <p>No Contests to show :(</p>
+        {% endif %}
+    </div>
+{% endblock %}

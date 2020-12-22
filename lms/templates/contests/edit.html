@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="row">
+        <form method="post" action="{% url 'edit-contest' pk=contest.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="id" value="{{ contest.id }}">
+            <label for="contest_name">Name *</label>
+            <input class="form-control" type="text" name="name" id="contest_name" required value="{{ contest.name }}">
+            <label for="starts_at">Starts At *</label>
+            <input class="form-control" type="datetime-local" name="starts_at" id="starts_at" required
+                   value="{{ starts_at }}">
+            <label for="ends_at">Ends At</label>
+            <input class="form-control" type="datetime-local" name="ends_at" id="ends_at" value="{{ ends_at }}">
+            <div>
+                <p>Visibility</p>
+                {% if contest.is_private %}
+                    <input type="radio" value="0" name="is_private" id="public">
+                    <label for="public">Public</label><br>
+                    <input type="radio" value="1" name="is_private" id="private" checked>
+                    <label for="private">Private</label><br>
+                {% else %}
+                    <input type="radio" value="0" name="is_private" id="public" checked>
+                    <label for="public">Public</label><br>
+                    <input type="radio" value="1" name="is_private" id="private">
+                    <label for="private">Private</label><br>
+                {% endif %}
+
+            </div>
+            <label for="domains">Domains</label>
+            <input class="form-control" type="text" id="domains" name="domains" value="{{ domains }}">
+            <input type="submit" value="Save" class="btn btn-primary">
+        </form>
+    </div>
+
+{% endblock %}

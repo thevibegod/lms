@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+        Add Question
+    </button><br><br>
+    <div class="card col-12" id="main_body">
+
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add Question</h5>
+                    <button type="button" class="close" id="close_modal" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="question-form">
+                        <input type="hidden" id="counter" value="0">
+                        <label for="statement">Question Statement</label>
+                        <textarea class="form-control" id="statement" name="statement" required></textarea>
+                        <label for="image">Image ( If required )</label>
+                        <input class="form-control" type="file" name="image" id="image">
+                        <p>Difficulty Level</p>
+
+                        <input type="radio" name="difficulty_level" value="0" id="easy_option">
+                        <label for="easy_option">Easy</label><br>
+
+                        <input type="radio" name="difficulty_level" value="1" id="medium_option">
+                        <label for="medium_option">Medium</label><br>
+
+                        <input type="radio" name="difficulty_level" value="2" id="hard_option">
+                        <label for="hard_option">Hard</label><br>
+
+                        <p>Options</p>
+
+                        <div id="options_container">
+
+                        </div>
+                    </form>
+                    <button class="btn btn-primary" onclick="add_option_to_form()">Add Option</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="add_question()">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let questions = [];
+        const contest_id = '{{ id }}';
+        const api_key = '{{ token }}';
+        const main_body = document.getElementById('main_body');
+        const get_data = async () => {
+            const headers = new Headers();
+            headers.append('x-api-key', api_key);
+            const response = await fetch("{% url 'question-api'%}" + '?id=' + contest_id, {'headers': headers})
+            if (response.status === 200) {
+                const json_data = await response.json();
+                questions = json_data.data;
+            } else {
+                location.reload();
+                questions = []
+            }
+        }
+        const display_questions = async () => {
+            await get_data();
+            if (questions.length === 0) {
+                main_body.innerHTML = '<div class="card-body"><h5 class="card-title">No questions to display</h5></div>'
+            } else {
+                let count = 1;
+                let html_string = '';
+                let difficulty_levels = {0: 'Easy', 1: 'Medium', 2: 'Hard'}
+                for (let question of questions) {
+                    html_string += `<div class="card-header" style="align-content: space-around"><h6 class="card-title">Question Number ${count}</h6><h6 class="card-title">Difficulty Level:${difficulty_levels[question.difficulty_level]}</h6><br><button class="btn btn-danger" onclick="delete_question(${question.id})">Delete</button></div><div class="card-body"><h5 class="card-title">${question.statement}</h5>`
+                    if (question.image) {
+                        let link = '/static/' + question.image.substring(7);
+                        html_string += `<img src=${link} class="card-img col-6" height="auto"/>`
+                    }
+                    html_string += '</div></div>'
+                    count++;
+                    for (let option of question.options) {
+                        if (option.is_correct) {
+                            html_string += `<div class="card-body list-group list-group-flush "><li class="list-group-item"><input id="choice_number${option.choice_number}" name="question_${question.id}" type="radio" value="${option.choice_number}" checked>&nbsp;<label for="options_1" class="card-text">${option.statement}</label><br>`
+                        } else {
+                            html_string += `<div class="card-body list-group list-group-flush "><li class="list-group-item"><input id="choice_number${option.choice_number}" name="question_${question.id}" type="radio" value="${option.choice_number}">&nbsp;<label for="options_1" class="card-text">${option.statement}</label><br>`
+                        }
+                        if (option.image) {
+                            let link = '/static/' + option.image.substring(7);
+                            html_string += `<img src=${link} class="card-img col-6" height="auto"/>`
+                        }
+                        html_string += '</li></div>'
+                    }
+                }
+
+
+                main_body.innerHTML = html_string;
+            }
+        }
+        display_questions()
+
+        const add_question = async () => {
+            const form = document.getElementById('question-form');
+            const form_data = new FormData(form);
+            form_data.append('id', '{{ id }}');
+            const headers = new Headers();
+            headers.append('x-api-key', '{{token}}');
+            {#headers.append('content-type', 'multipart/form-data');#}
+            const response = await fetch("{% url 'question-api' %}", {
+                method: "POST",
+                body: form_data,
+                headers: headers
+            });
+            if (response.status === 200) {
+                swal('Question Added');
+                location.reload()
+                document.getElementById('close_modal').click()
+            } else {
+                swal('Error in creating question');
+            }
+        }
+
+        const add_option_to_form = () => {
+            const container = document.getElementById('options_container');
+            const counter = document.getElementById('counter');
+            const count = Number(counter.value) + 1;
+            const inner_container = document.createElement('div');
+            inner_container.innerHTML += `<label for='text_${count}'>Option ${count} Statement</label><br><textarea cols="60" id='text_${count}' name="option_${count}_text"></textarea><br>`
+            inner_container.innerHTML += `<p>Correct</p><input id='value_${count}_yes' value="true" type="radio" name="option_${count}_value"><label for="value_${count}_yes">Yes</label><br><input id='value_${count}_no' value="false" type="radio" name="option_${count}_value"><label for="value_${count}_no">No</label><br>`
+            container.append(inner_container)
+            counter.value = count;
+        }
+
+        const delete_question = async (id) => {
+            swal("Are you sure you want to do this?", {
+                buttons: ["No", "Yes"], icon: "warning"
+            }).then(async value => {
+                if (value) {
+                    const url = "/contests/api/question/delete/"+id+'/';
+                    const headers = new Headers();
+                    headers.append('x-api-key', '{{token}}');
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: headers
+                    });
+                    if (response.status === 200) {
+                        swal('Question Deleted');
+                        location.reload()
+                    } else {
+                        swal('Error in deleting question');
+                    }
+                }
+            });
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="row">
+        <form method="post" action="{% url 'create-profile' %}">
+            {% csrf_token %}
+            <div>
+                <p>Hi {{ request.user.first_name }} ! You are a</p>
+                <input type="radio" value="0" name="type" id="student" checked>
+                <label for="student">Student</label><br>
+                <input type="radio" value="1" name="type" id="instructor">
+                <label for="instructor">Instructor</label><br>
+
+
+            </div>
+            <label for="password">Password</label>
+            <input class="form-control" type="password" name="password" id="password">
+            <label for="domains">Domains</label>
+            <input class="form-control" type="text" name="domains">
+            <input type="submit" value="Save" class="btn btn-primary">
+        </form>
+    </div>
+
+
+{% endblock %}

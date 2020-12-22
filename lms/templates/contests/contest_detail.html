@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div>
+        <h3>Starts At</h3>
+        <p>{{ contest.starts_at }}</p>
+        <h3>Ends At</h3>
+        {% if contest.ends_at %}
+            <p>{{ contest.ends_at }}</p>
+        {% else %}
+            <p>Open Indefinitely</p>
+        {% endif %}
+        <h3>Domains</h3>
+        <p>
+            {% for domain in contest.domains.all %}
+                {{ domain }}
+            {% endfor %}
+        </p>
+        <div id='start-btn'>
+            <a href="{% url 'start-contest' id=contest.id %}" class="btn btn-primary">Start Now</a>
+        </div>
+        <h3>Share this contest</h3>
+        <p>Contest Code: {{ contest.contest_code }}</p>
+    </div>
+    <script>
+        const start_date = new Date('{{ start }}');
+        let end_date = null;
+        if ('{{ end }}' !== '') {
+            end_date = new Date('{{ end }}');
+        }
+
+        const enable_disable_button = () => {
+            let enable = false;
+            let datetime = new Date();
+            if (datetime >= start_date) {
+                enable = true;
+            }
+            if (end_date !== null) {
+                if (datetime >= end_date) {
+                    enable = false;
+                }
+            }
+            if (enable) {
+                document.getElementById('start-btn').style.display = 'block';
+            } else {
+                document.getElementById('start-btn').style.display = 'none';
+            }
+        }
+        enable_disable_button();
+        setInterval(() => enable_disable_button(), 2000);
+
+    </script>
+{% endblock %}

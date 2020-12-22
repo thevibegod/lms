@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <script>
+        window.time = Number('{{ time }}');
+        let int = null;
+        window.onbeforeunload = function () {
+            return "Do you want to end your test ? This section will be counted as 0 score.";
+        };
+        int = setInterval(() => {
+            const timer_object = document.getElementById('timer');
+            let min = Number.parseInt((window.time / 60).toString());
+            let sec = window.time % 60;
+            min = min > 9 ? min : '0' + min;
+            sec = sec > 9 ? sec : '0' + sec;
+            timer_object.innerText = `${min}:${sec}`
+            document.getElementById("submit_time").value = window.time;
+            if (window.time === 0 || window.time < 0) {
+                const form = document.getElementById('section_form');
+                form.submit();
+            }
+            window.time--;
+        }, 1000);
+    </script>
+    <p id="timer">Timer</p>
+    {% if section.difficulty_level == 0 %}
+        <h1>Section Difficulty - Easy </h1>
+    {% elif section.difficulty_level == 1 %}
+        <h1>Section Difficulty - Medium</h1>
+    {% else %}
+        <h1>Section Difficulty - Hard</h1>
+    {% endif %}
+    <form action="" method="post" name="section_form">
+        {% csrf_token %}
+        <input type="hidden" name="section" value="{{ section.id }}">
+        <input type="hidden" name="time" id="submit_time" value="tim">
+        <div class="card col-12" id="main_body">
+            {% for question in section.questions.all %}
+                <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Question</h2>
+                </div>
+                <div class="card-body">
+                    <p>{{ question.question.statement }}</p>
+                    {% if question.question.image %}
+                        <img class="card-img col-6" height="auto" src="{{ question.question.image }}"/>
+                    {% endif %}
+                    {% for option in question.question.options.all %}
+                        <div class="card-body list-group list-group-flush ">
+                        <li class="list-group-item">
+                        <input id="choice_number_{{ option.choice_number }}" name="question_{{ question.id }}"
+                               type="radio"
+                               value="{{ option.choice_number }}">&nbsp;
+                        <label for="choice_number_{{ option.choice_number }}"
+                               class="card-text">{{ option.statement }}</label><br>
+                    {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+            <input class="btn btn-block col-1 offset-6 btn-danger"  value="Submit" type="submit">
+            </div>
+
+    </form>
+
+    <script>
+        const elems = document.getElementsByClassName("card-img");
+        for (let elem of elems) {
+            elem.src = '/static/questions' + elem.src.split('questions')[1];
+        }
+    </script>
+{% endblock %}

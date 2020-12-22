@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <br>
+    <a href="{% url 'create-contest' %}" class="btn btn-primary">Create New Contest</a><br><br>
+    <div class="table-responsive">
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Contest Code</th>
+                <th>Starts At</th>
+                <th>Ends At</th>
+                <th>Created At</th>
+                <th>Domains</th>
+                <th>Visibility</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for contest in contests %}
+                <tr>
+                    <td>{{ contest.name }}</td>
+                    <td>{{ contest.contest_code }}</td>
+                    <td>{{ contest.starts_at }}</td>
+                    <td>{{ contest.ends_at }}</td>
+                    <td>{{ contest.created_at }}</td>
+                    <td>{% for domain in contest.domains.all %}<p>{{ domain }} </p>{% endfor %}</td>
+                    <td>{% if not contest.is_private %}Public{% else %}Private {% endif %}</td>
+                    <td>
+                        <i class="fa fa-trash" aria-hidden="true" onclick="delete_contest('{{ contest.id }}')"></i>
+                        <a href="{% url 'edit-contest' pk=contest.id %}"><i class="fa fa-edit"
+                                                                            aria-hidden="true"></i></a>
+                        <a href="{% url 'view-questions' id=contest.id %}"><i class="fa fa-eye"
+                                                                            aria-hidden="true"></i></a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <form class="hidden" method="post" id="delete-form">
+        {% csrf_token %}
+    </form>
+    <script>
+        const delete_contest = (pk) => {
+            swal("Are you sure you want to do this?", {
+                buttons: ["No", "Yes"], icon: "warning"
+            }).then(value => {
+                if (value) {
+                    const form = document.getElementById('delete-form');
+                    form.action = "/contests/delete/" + pk + '/';
+                    form.submit();
+                }
+            });
+        }
+    </script>
+
+{% endblock %}
