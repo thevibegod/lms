@@ -40,7 +40,7 @@ sqlparse==0.3.1
 static3==0.7.0
 tornado==6.1
 tqdm==4.54.0
-urllib3==1.25.9
+urllib3==1.26.5
 vine==5.0.0
 zipp==3.4.0
 
