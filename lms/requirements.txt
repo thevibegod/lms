@@ -14,7 +14,7 @@ django-cors-headers==3.3.0
 django-timezone-field==4.1.1
 djangorestframework==3.12.2
 djangorestframework-jwt==1.11.0
-flower==0.9.5
+flower==1.2.0
 gunicorn==19.7.1
 humanize==3.1.0
 idna==2.9
